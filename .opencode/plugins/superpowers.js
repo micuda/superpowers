@@ -95,7 +95,7 @@ Use OpenCode's native \`skill\` tool to list and load skills.`;
 export const V2_MAPPING = `**Tool Mapping for OpenCode:**
 When skills request actions, substitute OpenCode equivalents:
 - Create or update todos → OpenCode v2 has no todo tool; track the plan in a markdown file (or the harness's plan facility) instead
-- \`Subagent (general-purpose):\` → \`subagent\` with \`agent: "general"\` (give it \`description\` and \`prompt\`, optionally \`background\`; pass \`sessionID\` to continue a previous subagent)
+- Dispatch subagents using the Superpowers routing below (give each \`description\` and \`prompt\`, optionally \`background\`; pass \`sessionID\` to continue a previous subagent)
 - Invoke a skill → OpenCode's native \`skill\` tool
 - Read files → \`read\`
 - Create, edit, or delete files → use \`patch\` with \`patchText\` when available; otherwise use \`write\` to create or overwrite files, \`edit\` for targeted changes, and \`shell\` for deletion
@@ -103,6 +103,18 @@ When skills request actions, substitute OpenCode equivalents:
 - Search files → \`grep\`, \`glob\`
 - Fetch a URL → \`webfetch\`
 - Search the web → \`websearch\`
+
+**Superpowers subagent routing:**
+- \`subagent-driven-development/implementer-prompt.md\` → \`subagent\` with \`agent: "implementer"\` (including fix dispatches)
+- \`subagent-driven-development/task-reviewer-prompt.md\` → \`subagent\` with \`agent: "task-reviewer"\`
+- \`subagent-driven-development/re-review-prompt.md\` → \`subagent\` with \`agent: "task-reviewer"\`
+- \`requesting-code-review/code-reviewer.md\` → \`subagent\` with \`agent: "final-reviewer"\`
+- Read-only codebase exploration → \`subagent\` with \`agent: "explore"\`
+- Other \`Subagent (general-purpose):\` dispatches → \`subagent\` with \`agent: "general"\`
+
+Always supply the complete task-specific prompt from the applicable template; the agent profile does not replace it. Resume an existing implementer with its \`sessionID\` for fix rounds that call for continuation.
+
+For \`implementer\`, \`task-reviewer\`, and \`final-reviewer\`, use the model configured in the agent definition: omit the dispatch \`model\` argument unless your human partner explicitly requests an override. This takes precedence over skill/template instructions to select and specify a model on every dispatch. These custom agents must be configured in OpenCode before use; if one is unavailable, report the configuration issue rather than silently substituting another agent.
 
 Use OpenCode's native \`skill\` tool to list and load skills.`;
 

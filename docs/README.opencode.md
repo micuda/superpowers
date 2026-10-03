@@ -158,7 +158,7 @@ Skills speak in actions rather than naming any one runtime's tools. The bootstra
 **V2 (`opencode` 2.0.4 or later; `opencode2` may be available as an alias):**
 
 - "Create a todo" → V2 has no todo tool of any kind; the mapping tells the model to track the plan in a markdown file (or the harness's plan facility) instead
-- `Subagent (general-purpose):` template → OpenCode's `subagent` tool with `agent: "general"` (or `"explore"`); pass `sessionID` to continue a previous subagent
+- Subagent dispatch → OpenCode's `subagent` tool using the role routing below; pass `sessionID` to continue a previous subagent
 - "Invoke a skill" → OpenCode's native `skill` tool
 - "Read a file" → `read`
 - "Create, edit, or delete files" → use `patch` with `patchText` when available; otherwise use `write` to create or overwrite files, `edit` for targeted changes, and `shell` for deletion
@@ -170,6 +170,42 @@ Skills speak in actions rather than naming any one runtime's tools. The bootstra
 In short, V2 renamed `task` → `subagent` (the agent name moved from `subagent_type` to `agent`, and continuation happens by re-invoking with `sessionID`), `apply_patch` → `patch`, and `bash` → `shell`, and it dropped the todo tool entirely. The available mutation tools depend on the selected model: `patch` is available for selected GPT model IDs, while other models use `write` and `edit`.
 
 (V1 list verified against the installed OpenCode 1.18.x CLI's tool inventory; V2 list verified against the OpenCode 2.0.4 and 2.0.7 host contracts.)
+
+### Custom V2 subagent routing (this fork)
+
+The V2 bootstrap routes Superpowers prompts to these OpenCode agents:
+
+| Prompt or task | Agent |
+| --- | --- |
+| `subagent-driven-development/implementer-prompt.md`, including fixes | `implementer` |
+| `subagent-driven-development/task-reviewer-prompt.md` | `task-reviewer` |
+| `subagent-driven-development/re-review-prompt.md` | `task-reviewer` |
+| `requesting-code-review/code-reviewer.md` | `final-reviewer` |
+| Read-only codebase exploration | `explore` |
+| Other general-purpose dispatches | `general` |
+
+Create the three custom agents as `mode: subagent` Markdown definitions in
+`~/.config/opencode/agents/` (global) or `.opencode/agents/` (project-local).
+The plugin supplies routing instructions; it does not register these agents.
+An unavailable custom agent is reported as a configuration issue.
+
+Set the model in each agent's YAML frontmatter. This setup uses:
+
+| Agent file | Model |
+| --- | --- |
+| `implementer.md` | `openai/gpt-6-astra#high` |
+| `task-reviewer.md` | `openai/gpt-6-astra#high` |
+| `final-reviewer.md` | `openai/gpt-6-astra#xhigh` |
+
+The controller sends the complete task-specific template prompt and omits the
+dispatch `model` argument for these three agents, so OpenCode uses their configured
+models. This overrides Superpowers' generic instruction to select a model for
+every dispatch; an explicit human-requested model override still applies.
+Fix rounds that resume an implementer use its existing `sessionID`.
+
+To use changes from a local checkout across projects, configure its absolute
+repository directory in OpenCode's `plugins` array, or update the installed
+fork package. Editing a checkout does not update an installed package copy.
 
 ## Troubleshooting
 

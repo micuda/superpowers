@@ -151,7 +151,7 @@ Skills speak in actions ("create a todo", "dispatch a subagent", "read a file").
 **V2 (`opencode` 2.0.4 or later; `opencode2` may be available as an alias):**
 
 - "Create a todo" → V2 has no todo tool; track the plan in a markdown file instead
-- `Subagent (general-purpose):` template → `subagent` tool with `agent: "general"` (or `"explore"`); pass `sessionID` to continue a previous subagent
+- Subagent dispatch → `subagent` with role-based routing: implementer prompts and fixes use `implementer`; task reviews and scoped re-reviews use `task-reviewer`; `requesting-code-review/code-reviewer.md` uses `final-reviewer`; read-only exploration uses `explore`; other general-purpose dispatches use `general`. Pass `sessionID` to continue a previous subagent.
 - "Invoke a skill" → OpenCode's native `skill` tool
 - "Read a file" → `read`
 - "Create, edit, or delete files" → use `patch` with `patchText` when available; otherwise use `write` to create or overwrite files, `edit` for targeted changes, and `shell` for deletion
@@ -159,6 +159,13 @@ Skills speak in actions ("create a todo", "dispatch a subagent", "read a file").
 - "Search file contents" / "find files by name" → `grep`, `glob`
 - "Fetch a URL" → `webfetch`
 - "Search the web" → `websearch`
+
+This fork requires the three custom agents to be configured as `mode: subagent`.
+Their configured models take precedence over generic skill model-selection
+instructions; omit the dispatch `model` argument unless the human explicitly
+requests an override. Always send the complete task-specific template prompt.
+See [Custom V2 subagent routing](../docs/README.opencode.md#custom-v2-subagent-routing-this-fork)
+for agent locations and model settings.
 
 ## Getting Help
 
